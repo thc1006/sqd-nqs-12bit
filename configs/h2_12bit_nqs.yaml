@@ -1,0 +1,19 @@
+molecule:
+  name: H2
+  bond_length: 0.74
+
+encoding:
+  bits: 12
+
+sampling:
+  n_samples: 256
+  sampler: nqs_ffnn
+
+nqs:
+  n_hidden: 64
+  n_layers: 2
+  learning_rate: 1.0e-3
+  n_epochs: 20
+
+sqd:
+  max_subspace_dim: 256

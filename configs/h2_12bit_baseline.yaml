@@ -1,0 +1,13 @@
+molecule:
+  name: H2
+  bond_length: 0.74   # Angstrom
+
+encoding:
+  bits: 12            # target bit-depth / number of visible units
+
+sampling:
+  n_samples: 256
+  sampler: baseline   # baseline Bernoulli(0.5)
+
+sqd:
+  max_subspace_dim: 256
