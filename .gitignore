@@ -10,3 +10,8 @@ results/figures/*
 data/cached_samples/*
 dist/
 *.egg-info/
+
+.claude/agents
+.claude
+.claude/skills
+.claude/commands

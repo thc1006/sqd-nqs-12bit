@@ -1,0 +1,55 @@
+# LiH 12-bit ablation study configuration
+# Primary target molecule: LiH @ STO-3G = 12 spin orbitals ("12-bit")
+# Reference energies: HF=-7.615770, FCI=-7.634167 Ha
+
+molecule:
+  name: LiH
+  bond_length: 0.8    # Near equilibrium
+  basis: sto-3g       # 12 spin orbitals total
+
+# Ablation study parameters
+ablation:
+  # Sample budgets optimized for 12-bit system
+  sample_budgets:
+    - 100
+    - 500
+    - 1000
+    - 2500
+    - 5000
+    - 10000
+    - 25000  # Extended for challenging 12-bit case
+
+  # Number of random seeds
+  n_seeds: 5
+
+  # VMC training (longer for 12-bit)
+  vmc_epochs: 200
+
+  # NQS architecture (scaled for 12-bit)
+  nqs_alpha: 4        # hidden_dim = 12 * 4 = 48
+  nqs_layers: 3       # Slightly deeper for 12-bit
+
+  # SQD configuration
+  sqd_max_iterations: 10
+  sqd_num_batches: 5
+  sqd_samples_per_batch: 200
+
+# VMC training details
+vmc:
+  n_samples: 1000     # More samples for 12-bit
+  n_chains: 256
+  burn_in_steps: 200  # Longer burn-in for larger system
+  step_interval: 20
+  learning_rate: 0.005
+  sr_regularization: 1.0e-4
+  patience: 200
+  lr_schedule: cosine
+
+# SQD details
+sqd:
+  energy_tol: 1.0e-6
+  occupancies_tol: 1.0e-6
+  symmetrize_spin: true
+  carryover_threshold: 1.0e-4
+  max_cycle: 200
+  spin_sq: 0.0

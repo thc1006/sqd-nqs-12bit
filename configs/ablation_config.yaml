@@ -1,0 +1,53 @@
+# Ablation study configuration: NQS vs Baseline sampling
+# This config defines the systematic comparison of NQS and random sampling
+
+molecule:
+  name: H2
+  bond_length: 0.74
+  basis: sto-3g
+
+# Ablation study parameters
+ablation:
+  # Sample budgets to test (from small to large)
+  sample_budgets:
+    - 100
+    - 500
+    - 1000
+    - 2500
+    - 5000
+    - 10000
+
+  # Number of random seeds for statistical averaging
+  n_seeds: 5
+
+  # VMC training configuration
+  vmc_epochs: 100
+
+  # NQS architecture
+  nqs_alpha: 4        # hidden_dim = n_visible * alpha (4 for 12-bit = 48 hidden units)
+  nqs_layers: 2       # Number of hidden layers
+
+  # SQD configuration
+  sqd_max_iterations: 5
+  sqd_num_batches: 3
+  sqd_samples_per_batch: 100
+
+# VMC training details (used by NQS sampler)
+vmc:
+  n_samples: 500      # Samples per VMC epoch
+  n_chains: 256       # Parallel MCMC chains
+  burn_in_steps: 100  # MCMC burn-in
+  step_interval: 10   # Steps between samples
+  learning_rate: 0.01
+  sr_regularization: 1.0e-4
+  patience: 100       # Early stopping patience
+  lr_schedule: cosine
+
+# SQD details
+sqd:
+  energy_tol: 1.0e-6
+  occupancies_tol: 1.0e-6
+  symmetrize_spin: true
+  carryover_threshold: 1.0e-4
+  max_cycle: 200
+  spin_sq: 0.0        # Target S^2 (0 for singlet)
