@@ -16,7 +16,6 @@ __pycache__/
 # Results (large files)
 results/raw/*
 results/processed/*
-results/figures/*
 data/cached_samples/*
 
 # Build artifacts
