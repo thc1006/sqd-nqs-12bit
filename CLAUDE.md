@@ -59,30 +59,75 @@ samplers, primarily for small molecules like H₂ under **12–14-bit** represen
 
 Whenever you propose changes, keep alignment with these goals.
 
-## Key Directories
+## Repository Structure
 
-- `src/nqs_models/`
-  - `ffn_nqs.py` : FFNN-based NQS models (real-valued log-ψ or amplitude network)
-  - `utils.py`   : sampling utilities, parameter initializers, reweighting helpers
-- `src/sqd_interface/`
-  - `hamiltonian.py`      : builds molecular Hamiltonians (H₂, H₄, …) and 12-bit mappings
-  - `sqd_runner.py`       : thin wrapper around `qiskit-addon-sqd` pipelines
-  - `sampling_adapters.py`: adapters exposing a simple sampler API to SQD
-- `src/experiments/`
-  - `h2_12bit_small_sample.py`      : main experiment for H₂ @ 12-bit, few-sample regime
-  - `h_chain_scaling.py`            : optional scaling experiments (H₄ / H₆)
-  - `ablation_nqs_vs_baseline.py`   : head-to-head sampler comparison
-- `configs/`
-  - YAML configs describing molecule, basis mapping, sampler hyperparameters, SQD options
-- `data/`
-  - `molecule_integrals/` : optional precomputed molecular integrals or reference data
-  - `cached_samples/`     : re-usable sample sets to avoid recomputation
-- `results/`
-  - `raw/`       : raw logs, JSON/NPZ dumps of runs
-  - `processed/` : aggregated CSV/Parquet summaries
-  - `figures/`   : final plots for papers / slides
-- `notebooks/`
-  - Jupyter notebooks used for sanity checks and exploratory analysis
+```
+sqd-nqs-12bit/
+├── CLAUDE.md                     # Project guide (this file)
+├── DEVELOPMENT_PLAN.md           # Research phases and progress
+├── plan.md                       # PI meeting notes
+├── pyproject.toml                # Project dependencies
+│
+├── src/
+│   ├── nqs_models/
+│   │   ├── ffn_nqs.py            # FFNN NQS model (log-psi network)
+│   │   ├── vmc_training.py       # VMC trainer with SR (FIXED: ERI indexing)
+│   │   └── gpu_optimized.py      # GPU-optimized local energy (FIXED: chemist notation)
+│   │
+│   ├── sqd_interface/
+│   │   ├── hamiltonian.py        # PySCF molecular integrals (H2, LiH, H4, H6)
+│   │   └── sqd_runner.py         # qiskit-addon-sqd wrapper
+│   │
+│   └── experiments/
+│       ├── h2_12bit_small_sample.py
+│       ├── ablation_nqs_vs_baseline.py
+│       └── h_chain_scaling.py
+│
+├── scripts/
+│   ├── run_full_research_plan.py # Full experiment runner (Phase 0-3)
+│   ├── generate_phase_diagram.py # Visualization generation
+│   └── plot_results.py           # Legacy plotting
+│
+├── configs/
+│   ├── h2_12bit_nqs.yaml
+│   ├── h2_12bit_baseline.yaml
+│   ├── ablation_config.yaml
+│   └── lih_12bit_ablation.yaml
+│
+├── results/
+│   ├── raw/                      # Raw JSON experiment dumps
+│   ├── ablation/                 # Ablation study results
+│   ├── epoch_sweep/              # Epoch sweep data
+│   ├── phase_diagram/            # Phase diagram data (Phase 0-3)
+│   ├── scaling/                  # H-chain scaling results
+│   ├── figures/                  # Generated plots (PNG)
+│   └── EXPERIMENT_SUMMARY.md     # Results summary with bug fixes
+│
+└── notebooks/
+    └── NQS-SQD-Qiskit.ipynb      # Reference notebook (external vmc_cal.py)
+```
+
+## Key Files
+
+| File | Purpose | Status |
+|------|---------|--------|
+| `src/nqs_models/vmc_training.py` | VMC training with SR | Fixed (chemist notation) |
+| `src/nqs_models/gpu_optimized.py` | GPU local energy | Fixed (chemist notation) |
+| `src/sqd_interface/hamiltonian.py` | Molecular integrals | Working |
+| `src/sqd_interface/sqd_runner.py` | SQD pipeline | Working |
+| `scripts/run_full_research_plan.py` | Phase 0-3 runner | New |
+| `scripts/generate_phase_diagram.py` | Visualization | New |
+
+## Chemist vs Physicist Notation
+
+PySCF uses chemist notation for electron repulsion integrals (ERI):
+
+| Integral | Chemist Notation | PySCF Index |
+|----------|------------------|-------------|
+| Coulomb J_pq | (pp\|qq) | `eri[p,p,q,q]` |
+| Exchange K_pq | (pq\|qp) | `eri[p,q,q,p]` |
+
+Previously fixed bugs in `vmc_training.py:195-221` and `gpu_optimized.py:190-197`.
 
 ## Standards
 
