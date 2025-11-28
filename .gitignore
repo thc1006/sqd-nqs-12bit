@@ -1,17 +1,30 @@
+# Virtual environment
 .venv/
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+
+# Jupyter
 .ipynb_checkpoints/
+
+# Environment files
 .env
 .env.*
+
+# Results (large files)
 results/raw/*
 results/processed/*
 results/figures/*
 data/cached_samples/*
+
+# Build artifacts
 dist/
 *.egg-info/
 
-.claude/agents
-.claude
-.claude/skills
-.claude/commands
+# Local-only files (not for GitHub)
+CLAUDE.md
+.mcp.json
+.claude/
+plan.md

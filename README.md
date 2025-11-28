@@ -1,55 +1,91 @@
 # sqd-nqs-12bit
 
 Sample-efficient Sample-based Quantum Diagonalization (SQD) with feed-forward
-Neural Quantum State (NQS) samplers for small molecules (starting from H₂)
-under 12–14-bit encodings.
+Neural Quantum State (NQS) samplers for small molecules under 12-bit encodings.
 
-This repository is designed to be used together with **Claude Code** (Opus 4.5)
-as an agentic research assistant. The key idea is to:
+## Key Finding
 
-- use an FFNN-based NQS as a **classical sampler** that generates bitstring
-  configurations for a molecular Hamiltonian,
-- feed these samples into **`qiskit-addon-sqd`** to perform Sample-based Quantum
-  Diagonalization,
-- study how **few samples** (and imperfect samplers) can still recover accurate
-  ground-state energies (e.g. pushing from ~ -5.6 Ha toward ~ -7.63 Ha).
+**NQS training quality and SQD accuracy are negatively correlated.**
 
-## Quick start
+In 12-bit systems (LiH, H4, H6), uniform random sampling (Baseline) consistently
+outperforms well-trained NQS samplers. This counterintuitive result suggests that
+SQD success depends on sample diversity rather than sample quality.
 
-1. Create a virtual environment (example using `uv`):
+| Molecule | Method | SQD Error (mHa) | Conservation Ratio |
+|----------|--------|-----------------|-------------------|
+| LiH | NQS | 312.18 | 6.5% |
+| LiH | Baseline | 65.38 | 5.1% |
+| H4 | NQS | 156.07 | 35.7% |
+| H4 | Baseline | ~0 | 14.5% |
+| H6 | NQS | 385.77 | 25.1% |
+| H6 | Baseline | ~0 | 9.8% |
 
-   ```bash
-   uv venv
-   source .venv/bin/activate
-   ```
+## Experiment Summary
 
-2. Install dependencies in editable mode:
+- **Total experiments**: 1788 runs across LiH, H4, H6
+- **Systems tested**: 8-12 spin orbitals, 4-6 electrons
+- **Parameters scanned**: epochs (50-500), samples (100-5000), bond lengths (1.0-3.0 A)
 
-   ```bash
-   uv pip install -e .
-   ```
+Full results: [`results/figures/experiment_report.md`](results/figures/experiment_report.md)
 
-   If you are not using `uv`, you can instead do:
+## Quick Start
 
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   pip install -e .
-   ```
+```bash
+# Create virtual environment
+uv venv && source .venv/bin/activate
 
-3. Open the project with **Claude Code** from this folder. Claude will read
-   `CLAUDE.md`, discover `skills/` and `.claude/commands/`, and can help you
-   implement the missing pieces step by step.
+# Install dependencies
+uv pip install -e .
 
-4. Run the (currently stub) main experiment script:
+# Run full experiment pipeline
+python scripts/run_full_research_plan.py
 
-   ```bash
-   uv run python -m src.experiments.h2_12bit_small_sample      --config configs/h2_12bit_nqs.yaml
-   ```
+# Generate visualizations
+python scripts/generate_phase_diagram.py
+python scripts/generate_missing_figures.py
+```
 
-   This script currently only prints placeholders and checks that imports work.
-   You can ask Claude Code to flesh it out into a real experiment.
+## Project Structure
 
-## Project layout
+```
+sqd-nqs-12bit/
+├── src/
+│   ├── nqs_models/          # FFNN NQS, VMC training, GPU optimization
+│   ├── sqd_interface/       # PySCF integrals, qiskit-addon-sqd wrapper
+│   └── experiments/         # Experiment runners
+├── scripts/
+│   ├── run_full_research_plan.py   # Main experiment runner
+│   ├── generate_phase_diagram.py   # Visualization
+│   └── hackmd_sync.py              # HackMD integration
+├── results/
+│   ├── phase_diagram/       # Raw JSON data
+│   └── figures/             # Generated plots and reports
+├── DEVELOPMENT_PLAN.md      # Research progress tracking
+└── CLAUDE.md                # Project guide for Claude Code
+```
 
-See `CLAUDE.md` for a detailed breakdown of directories and workflows.
+## Generated Figures
+
+| Figure | Description |
+|--------|-------------|
+| `vmc_vs_sqd_scatter.png` | VMC vs SQD error (negative correlation) |
+| `training_analysis.png` | Training epochs effect on accuracy |
+| `sample_efficiency.png` | Sample count vs SQD error |
+| `hchain_scaling.png` | H4/H6 system scaling |
+| `conservation_distributions.png` | Conservation ratio histograms |
+| `heatmap_analysis.png` | Multi-parameter heatmaps |
+
+## Requirements
+
+- Python 3.12+
+- PyTorch 2.5+ (CUDA 12.1)
+- qiskit-addon-sqd
+- PySCF
+- NVIDIA RTX 4090 (recommended)
+
+## References
+
+- [qiskit-addon-sqd](https://qiskit.github.io/qiskit-addon-sqd/)
+- [SKQD](https://arxiv.org/html/2501.09702v1)
+- [SQD Limitations](https://arxiv.org/html/2501.07231v1)
+- [Fermionic NQS](https://www.nature.com/articles/s41467-020-15724-9)
